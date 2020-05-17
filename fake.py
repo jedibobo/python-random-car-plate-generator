@@ -10,9 +10,9 @@ localized = True
 
 
 class InsurProvider(BaseProvider):
-    license_plate_provinces = ("京")#这里添加不同省份，原项目需要，生成的大部分为一个地区的车
+    license_plate_provinces = ("京")  # 这里添加不同省份，原项目需要，生成的大部分为一个地区的车
 
-    license_plate_last = ("学", "警", "使", "领")
+    license_plate_last = ("学", "警", "使", "领")  # 添加特殊车辆的尾字。
 
     license_plate_num = ("A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L",
                          "M", "N", "P", "Q", "R", "S", "T", "U", "V", "W", "X",
@@ -91,11 +91,13 @@ if __name__ == "__main__":
     import random
     import pandas as pd
     import math
-    flow = random.randint(125, 175)
-    normal_num = math.floor(flow * 0.7)
-    ele_normal_num = math.floor(flow * 0.19)
-    special_num = math.floor(flow * 0.04)
-    outside_num = math.floor(flow * 0.07)
+    flow = random.randint(125, 175)  # 这里控制生成的车辆数目
+
+    # 控制各种车辆的权重
+    normal_num = math.floor(flow * 0.7)  # 普通内燃汽车
+    ele_normal_num = math.floor(flow * 0.19)  # 电动汽车
+    special_num = math.floor(flow * 0.04)  # 特殊车辆
+    outside_num = math.floor(flow * 0.07)  # 外省车辆
     for i in range(0, normal_num):
         content.append([p.license_plate()])
     for i in range(0, ele_normal_num):
@@ -120,18 +122,21 @@ if __name__ == "__main__":
     import radar
     import datetime
     from random import shuffle
-    shuffle(content)
+    shuffle(content)  # 车牌的乱序
     for x in content:
-        starttime = radar.random_datetime()
+        starttime = radar.random_datetime()  # 随机时间生成
         stop = starttime.strftime('%Y-%m-%d')
         stop = stop + ' 23:59:59'
-        endtime = radar.random_datetime(start=starttime, stop=stop)
+        endtime = radar.random_datetime(
+            start=starttime, stop=stop)  # 要求进入时间早于出来时间
+        # 这里的时间格式决定最后的输出形式（为了简化这里使用c++int能读的）
         x.append(starttime.strftime('%H%M%S'))
         x.append(endtime.strftime('%H%M%S'))
-    content = sorted(content, key=lambda x: x[1])
+    content = sorted(content, key=lambda x: x[1])  # 根据进入时间排序
     # print(content)
     count = 0
-
+    # 为了调整每个时段车辆的权重，这里flow乘的系数可以更改。
+    # 这里生成了每个时段车辆数的一个列表
     count_list = [
         math.floor(flow * 1 / 32.9),
         math.floor(flow * 1 / 32.9),
@@ -158,7 +163,9 @@ if __name__ == "__main__":
         math.floor(flow * 1.3 / 32.9),
         math.floor(flow * 1.1 / 32.9),
     ]
-    print(count_list)
+    # print(count_list)
+
+    # 小时的列表
     hour_list = [
         '00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11',
         '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'
@@ -168,6 +175,8 @@ if __name__ == "__main__":
     hour_num = []
     hour_index = 0
     num = 0
+
+    # 根据hour——list生成上方数据在每个小时实际的车数量
     for x in content:
         hour = hour_list[hour_index]
         if x[1][0:2] == hour:
@@ -178,7 +187,11 @@ if __name__ == "__main__":
             if (hour_index < 23):
                 hour_index += 1
     hour_num.append(len(content) - sum(hour_num))
-    print(hour_num)
+    #
+    # print(hour_num)
+
+    # 做加权处理
+    # 原则是多与标准删去，少于标准不变
     count = 0
     new_content = []
     before = 0
@@ -194,6 +207,7 @@ if __name__ == "__main__":
             total += hour_num[i]
     # print(new_content)
 
+    # 打印一下分布
     plt.figure(figsize=(20, 15))
     plt.bar(range(len(count_list)),
             count_list,
@@ -213,9 +227,12 @@ if __name__ == "__main__":
     print(new_content)
     name = ['label', 'in', 'out']
     test = pd.DataFrame(columns=name, data=new_content)
-    #test['in'] = '\t' + test['in']
-    #test['out'] = '\t' + test['out']
+    # test['in'] = '\t' + test['in']#用于excel显示时有开头的0
+    # test['out'] = '\t' + test['out']#用于excel显示时有开头的0
     test.to_csv('./fakedata.csv', index=False, encoding='GB18030')
+    # 最后的编码方法适用于c++的csv读取且在vs2019，GBK下不会乱码
+
+    # 可选的功能列表
 # 随机生成普通车牌
 # print(p.license_plate())
 
