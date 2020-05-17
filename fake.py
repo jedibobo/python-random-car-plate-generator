@@ -10,7 +10,7 @@ localized = True
 
 
 class InsurProvider(BaseProvider):
-    license_plate_provinces = ("京")
+    license_plate_provinces = ("京")#这里添加不同省份，原项目需要，生成的大部分为一个地区的车
 
     license_plate_last = ("学", "警", "使", "领")
 
